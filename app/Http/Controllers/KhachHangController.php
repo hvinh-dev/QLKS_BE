@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Google_Client;
 
 class KhachHangController extends Controller
 {
@@ -332,4 +333,66 @@ class KhachHangController extends Controller
             ]);
         }
     }
+
+    public function loginGoogle(Request $request)
+    {
+        if (!$request->has('credential')) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Thiếu token Google',
+            ]);
+        }
+
+        $client = new Google_Client(['client_id' => env('CLIENT_GG')]);
+        $payload = $client->verifyIdToken($request->credential);
+
+        if (!$payload) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Token không hợp lệ',
+            ]);
+        }
+
+        // Lấy thông tin từ Google
+        $email = $payload['email'] ?? null;
+        $ho_va_ten = $payload['name'] ?? 'Người dùng Google';
+
+        if (!$email) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Không lấy được email từ Google',
+            ]);
+        }
+
+        // Kiểm tra user đã tồn tại chưa
+        $user = KhachHang::where('email', $email)->first();
+        if ($user) {
+            return response()->json([
+                'status' => 1,
+                'message' => 'Đăng nhập thành công',
+                'key' => $user->createToken('token_khachhang')->plainTextToken,
+            ]);
+        }
+
+        // Tạo tài khoản mới
+        $khachHang = KhachHang::create([
+            'ho_lot' => '',
+            'ten' => $ho_va_ten,
+            'email' => $email,
+            'password' => bcrypt(Str::random(16)),
+            'so_dien_thoai' => '0123456789',
+            'ngay_sinh' => '1990-01-01',
+            'is_active' => 1,
+        ]);
+
+        return response()->json([
+            'status' => 1,
+            'message' => 'Bạn Đăng Ký Tài Khoản ' . $email . ' Thành Công',
+            'key' => $khachHang->createToken('token_khachhang')->plainTextToken,
+        ]);
+    }
+
+
+
+
 }

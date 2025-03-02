@@ -24,4 +24,5 @@ class KhachHang extends Authenticatable
         'is_active',
         'ngay_sinh',
     ];
+
 }

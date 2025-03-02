@@ -145,6 +145,7 @@ Route::get('/client/chi-tiet-bai-viet/{id}', [BaiVietController::class, 'getdata
 Route::post('/dang-ky', [KhachHangController::class, 'dangKy']);
 Route::post('/admin/dang-nhap', [NhanVienController::class, 'dangNhap']);
 Route::post('/khach-hang/dang-nhap', [KhachHangController::class, 'dangNhap']);
+Route::post('/khach-hang/dang-nhap-google', [KhachHangController::class, 'loginGoogle']);
 Route::post("/kiem-tra-token-admin", [NhanVienController::class, "kiemTraToken"]);
 Route::get("/kiem-tra-token-khach-hang", [KhachHangController::class, "kiemTraToken"]);
 Route::post("/danh-sach-phong-dat", [ChiTietThuePhongController::class, "danhSachHienThi"]);
