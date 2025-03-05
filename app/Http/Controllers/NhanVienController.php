@@ -7,17 +7,50 @@ use App\Models\ChiTietPhanQuyen;
 use App\Models\NhanVien;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class NhanVienController extends Controller
 {
     public function dangXuat()
     {
-       //Chờ code Thầy dạy
+        $nhan_vien = Auth::guard('sanctum')->user();
+        if($nhan_vien && $nhan_vien instanceof \App\Models\NhanVien){
+            DB::table('personal_access_tokens')
+              ->where('id', $nhan_vien->currentAccessToken()->id)->delete();
+
+
+            return response()->json([
+                'status' => true,
+                'message' => "Đã đăng xuất thiết bị này thành công"
+            ]);
+        } else {
+            return response()->json([
+                'status' => false,
+                'message' => "Vui lòng đăng nhập"
+            ]);
+        }
     }
 
     public function dangXuatAll()
     {
-        //Chờ code Thầy dạy
+        $nhan_vien = Auth::guard('sanctum')->user();
+        if($nhan_vien && $nhan_vien instanceof \App\Models\NhanVien){
+            $ds_token = $nhan_vien->tokens;
+            foreach($ds_token as $k => $v) {
+                $v->delete();
+            }
+
+
+            return response()->json([
+                'status' => true,
+                'message' => "Đã đăng xuất tất cả thiết bị này thành công"
+            ]);
+        } else {
+            return response()->json([
+                'status' => false,
+                'message' => "Vui lòng đăng nhập"
+            ]);
+        }
     }
 
     public function timKiem(Request $request)
